@@ -31,6 +31,6 @@ jobs:
           yarn install
           tsc
           mv ./package.json ./dist/package.json
-          cd dist && touch .npmrc && echo "${{ secrets.NPMRC_CONTENT }}" >> .npmrc && npm publish
+          cd dist && touch .npmrc && echo "${{ secrets.NPMRC_CONTENT }}" >> .npmrc && npm publish --access public
       
           
