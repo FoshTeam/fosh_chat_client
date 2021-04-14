@@ -1,5 +1,5 @@
 {
-  "name": "fosh-chat-client",
+  "name": "@fosh/chat-client",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
