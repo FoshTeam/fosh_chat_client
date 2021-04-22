@@ -1,4 +1,4 @@
-import signalR, {HttpTransportType, HubConnection, HubConnectionState} from '@microsoft/signalr';
+import {HttpTransportType, HubConnection, HubConnectionState, HubConnectionBuilder} from '@microsoft/signalr';
 import {ChatHub} from './hubs/ChatHub';
 import Config from './Config';
 import {GetUserMetadataFunc} from './FoshChatCaching.Types';
@@ -41,7 +41,7 @@ export class FoshChatClient<UserMetadata> {
     this.#appId = appId;
     this.#userJwt = userJwt;
   
-    this.#chatHub.Connection = new signalR.HubConnectionBuilder()
+    this.#chatHub.Connection = new HubConnectionBuilder()
       .withUrl(`${Config.ConnectionUrl}?appId=${this.#appId}`, {
         accessTokenFactory: () => this.#userJwt,
         transport: HttpTransportType.WebSockets,
