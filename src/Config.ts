@@ -1,5 +1,5 @@
 const Config = {
-  ConnectionUrl: "wss://fosh.ml/hubs/chat"
+  ConnectionUrl: "wss://chat.fosh.ml/hubs/chat"
 };
 
 export {Config};
