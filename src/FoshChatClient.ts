@@ -110,7 +110,7 @@ export class FoshChatClient<UserMetadata> {
     return await this.Connection.invoke('MarkAllMessagesAsRead');
   }
   
-  async getConversations(conversationUpdatedAt: Date): Promise<GetConversationsResponseWithUserMetadata<UserMetadata>> {
+  async getConversations(conversationUpdatedAt?: Date): Promise<GetConversationsResponseWithUserMetadata<UserMetadata>> {
     const result: GetConversationsResponse = await this.Connection.invoke('GetConversations', conversationUpdatedAt);
     
     let allIds = result.conversations.reduce<string[]>((all, cur) => {
@@ -151,7 +151,7 @@ export class FoshChatClient<UserMetadata> {
     }
   }
   
-  async getConversationMessages(conversationId: string, lastMessageTimestamp: Date): Promise<GetConversationMessagesResponseWithUserMetadata<UserMetadata>> {
+  async getConversationMessages(conversationId: string, lastMessageTimestamp?: Date): Promise<GetConversationMessagesResponseWithUserMetadata<UserMetadata>> {
     const result: GetConversationMessagesResponse = await this.Connection.invoke('GetConversationMessages', conversationId, lastMessageTimestamp);
   
     let allIds = result.messages.reduce<string[]>((all, cur) => {
