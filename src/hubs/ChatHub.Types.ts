@@ -28,8 +28,8 @@ export interface MessageData {
   sentAt: Date;
 }
 
-export interface GetConversationIdResponse {
-  conversationId: string;
+export interface GetConversationResponse {
+  conversation: Conversation;
 }
 
 export interface GetConversationMessagesResponse {

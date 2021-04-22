@@ -1,6 +1,6 @@
 import { HubConnection } from "@microsoft/signalr"
 import {
-    GetConversationIdResponse,
+    GetConversationResponse,
     GetConversationMessagesResponse,
     GetConversationsResponse,
     IChatHubCallbacks
@@ -41,8 +41,8 @@ export class ChatHub {
         return this.Connection.invoke('GetConversations', conversationUpdatedAt);
     }
 
-    getConversationId(otherUserId: string): Promise<GetConversationIdResponse> {
-        return this.Connection.invoke('GetConversationId', otherUserId);
+    getConversation(otherUserId: string): Promise<GetConversationResponse> {
+        return this.Connection.invoke('GetConversation', otherUserId);
     }
 
     getConversationMessages(conversationId: string, lastMessageTimestamp: Date): Promise<GetConversationMessagesResponse> {

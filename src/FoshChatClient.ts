@@ -5,7 +5,7 @@ import {GetUserMetadataFunc} from './FoshChatCaching.Types';
 import {FoshChatCaching} from './FoshChatCaching';
 import {
   ConversationDeletedData,
-  GetConversationIdResponse,
+  GetConversationResponse,
   GetConversationMessagesResponse,
   GetConversationsResponse,
   MarkConversationAsReadData,
@@ -179,7 +179,7 @@ export class FoshChatClient<UserMetadata> {
     }
   }
   
-  async getConversationId(otherUserId: string): Promise<GetConversationIdResponse> {
+  async getConversationId(otherUserId: string): Promise<GetConversationResponse> {
     return await this.Connection.invoke('GetConversationId', otherUserId);
   }
   
