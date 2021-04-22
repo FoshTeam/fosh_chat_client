@@ -1,6 +1,6 @@
 import {
   Conversation, ConversationDeletedData,
-  GetConversationMessagesResponse,
+  GetConversationMessagesResponse, GetConversationResponse,
   GetConversationsResponse, MarkConversationAsReadData,
   MessageData, MessageDeletedData,
   MessageRecievedData,
@@ -14,6 +14,10 @@ export interface ExtendWithUserMetadata<UserMetadata> {
 
 export interface GetConversationsResponseWithUserMetadata<UserMetadata> extends Omit<GetConversationsResponse, 'conversations'> {
   conversations: ConversationWithUserMetadata<UserMetadata>[];
+}
+
+export interface GetConversationResponseWithUserMetadata<UserMetadata> extends Omit<GetConversationResponse, 'conversation'> {
+  conversation: ConversationWithUserMetadata<UserMetadata>;
 }
 
 export interface GetConversationMessagesResponseWithUserMetadata<UserMetadata> extends GetConversationMessagesResponse {

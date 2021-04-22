@@ -18,7 +18,7 @@ import TypedEmitter from 'typed-emitter';
 import {
   ConversationUserIdWithUserMetadata,
   ConversationWithUserMetadata, FoshChatClientEvents,
-  GetConversationMessagesResponseWithUserMetadata,
+  GetConversationMessagesResponseWithUserMetadata, GetConversationResponseWithUserMetadata,
   GetConversationsResponseWithUserMetadata, MessageDataWithUserMetadata
 } from './FoshChatClient.Types';
 
@@ -179,8 +179,26 @@ export class FoshChatClient<UserMetadata> {
     }
   }
   
-  async getConversationId(otherUserId: string): Promise<GetConversationResponse> {
-    return await this.Connection.invoke('GetConversationId', otherUserId);
+  async getConversation(otherUserId: string): Promise<GetConversationResponseWithUserMetadata<UserMetadata>> {
+    const result: GetConversationResponse = await this.Connection.invoke('GetConversation', otherUserId);
+  
+    await this.#caching.checkCacheForUserIds(result.conversation.userIds);
+    
+    const newUserIds = result.conversation.userIds.map<ConversationUserIdWithUserMetadata<UserMetadata>>((userId) => {
+      const metadata = this.#caching.getUserMetadataFromCache(userId);
+      
+      return {
+        userId,
+        user: metadata
+      };
+    });
+    
+    return {
+      conversation: {
+        ...result.conversation,
+        userIds: newUserIds
+      }
+    };
   }
   
   async subscribeToPresence(otherUserId: string[]): Promise<void> {
