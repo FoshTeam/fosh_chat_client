@@ -16,7 +16,7 @@ export interface Conversation {
   conversationId: string;
   userIds: string[];
   unreadMessageCount: number;
-  lastMessage: MessageData;
+  lastMessage: MessageData | null;
   createdAt: Date;
   updatedAt: Date;
 }
