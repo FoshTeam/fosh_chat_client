@@ -111,7 +111,7 @@ export class FoshChatClient<UserMetadata> {
   }
   
   async getConversations(conversationUpdatedAt?: Date): Promise<GetConversationsResponseWithUserMetadata<UserMetadata>> {
-    const result: GetConversationsResponse = await this.Connection.invoke('GetConversations', conversationUpdatedAt);
+    const result: GetConversationsResponse = await this.Connection.invoke('GetConversations', conversationUpdatedAt ?? null);
     
     let allIds = result.conversations.reduce<string[]>((all, cur) => {
       cur.userIds.forEach(userId => {
@@ -152,7 +152,7 @@ export class FoshChatClient<UserMetadata> {
   }
   
   async getConversationMessages(conversationId: string, lastMessageTimestamp?: Date): Promise<GetConversationMessagesResponseWithUserMetadata<UserMetadata>> {
-    const result: GetConversationMessagesResponse = await this.Connection.invoke('GetConversationMessages', conversationId, lastMessageTimestamp);
+    const result: GetConversationMessagesResponse = await this.Connection.invoke('GetConversationMessages', conversationId, lastMessageTimestamp ?? null);
   
     let allIds = result.messages.reduce<string[]>((all, cur) => {
       if( all.indexOf(cur.senderUserId) === 0 ) {
