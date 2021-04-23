@@ -11,8 +11,6 @@ export class FoshChatCaching<UserMetadata> {
   }
   
   async checkCacheForUserIds(userIds: string[]) {
-    console.log('Checking caches for user ids: ', userIds);
-    
     const nonCachedUserIds = userIds.filter(userId => {
       return this.userCaches.some(cachedUserId => userId === cachedUserId.userId);
     }).map<UserIdCache<UserMetadata>>(userId => {
