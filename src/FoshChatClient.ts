@@ -84,6 +84,9 @@ export class FoshChatClient<UserMetadata> {
     this.getConversation = this.getConversation.bind(this);
     this.subscribeToPresence = this.subscribeToPresence.bind(this);
     this.unsubscribeFromPresence = this.unsubscribeFromPresence.bind(this);
+    this.onReconnected = this.onReconnected.bind(this);
+    this.onReconnecting = this.onReconnecting.bind(this);
+    this.onClose = this.onClose.bind(this);
   }
   
   // Public Methods
