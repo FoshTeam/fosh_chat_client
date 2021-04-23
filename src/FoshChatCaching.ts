@@ -47,10 +47,11 @@ export class FoshChatCaching<UserMetadata> {
     }
     
     const asyncActions = [];
+    const asyncActionsIds = [];
     
     for (let uncachedUser of uncachedUsers) {
       uncachedUser.state = CacheState.Caching;
-      
+      asyncActionsIds.push(uncachedUser.userId);
       asyncActions.push(this.getUserMetadataDelegate(uncachedUser.userId).catch(_ => {
           uncachedUser.state = CacheState.Uncached;
           return null;
@@ -59,7 +60,17 @@ export class FoshChatCaching<UserMetadata> {
     
     const results = await Promise.all(asyncActions);
     
-    return results.length > 0;
+    if(results.length > 0) {
+      results.forEach((user, index) => {
+        const uncachedUser = uncachedUsers[index];
+        
+        if(uncachedUser != null) {
+          uncachedUser.state = typeof user != null ? CacheState.Cached : CacheState.Uncached;
+        }
+      })
+    }
+    
+    return true;
   }
   
   getUserMetadataFromCache(userId: string): UserMetadata | null {
