@@ -26,22 +26,22 @@ export class FoshChatClient<UserMetadata> {
   readonly #eventEmitter: TypedEmitter<FoshChatClientEvents<UserMetadata>>;
   
   #connectionState: HubConnectionState;
-  #caching: FoshChatCaching<UserMetadata>;
-  #chatHub: ChatHub;
+  caching: FoshChatCaching<UserMetadata>;
+  chatHub: ChatHub;
   
   readonly #appId: string;
   readonly #userJwt: string;
   
   constructor(appId: string, userJwt: string, getUserMetadataDelegate: GetUserMetadataFunc<UserMetadata>) {
     this.#connectionState = HubConnectionState.Disconnected;
-    this.#caching = new FoshChatCaching<UserMetadata>(getUserMetadataDelegate);
-    this.#chatHub = new ChatHub();
+    this.caching = new FoshChatCaching<UserMetadata>(getUserMetadataDelegate);
+    this.chatHub = new ChatHub();
     this.#eventEmitter = new EventEmitter() as TypedEmitter<FoshChatClientEvents<UserMetadata>>;
     
     this.#appId = appId;
     this.#userJwt = userJwt;
   
-    this.#chatHub.Connection = new HubConnectionBuilder()
+    this.chatHub.Connection = new HubConnectionBuilder()
       .withUrl(`${Config.ConnectionUrl}?appId=${this.#appId}`, {
         accessTokenFactory: () => this.#userJwt,
         transport: HttpTransportType.WebSockets,
@@ -57,7 +57,7 @@ export class FoshChatClient<UserMetadata> {
     this.Connection.onreconnecting(this.onReconnecting.bind(this));
     this.Connection.onclose(this.onClose.bind(this));
   
-    this.#chatHub.registerCallbacks({
+    this.chatHub.registerCallbacks({
       presenceUpdate: this.onPresenceUpdate,
       messageRecieved: this.onMessageReceived,
       messageDeleted: this.onMessageDeleted,
@@ -145,11 +145,11 @@ export class FoshChatClient<UserMetadata> {
       return all;
     }, []);
     
-    await this.#caching.checkCacheForUserIds(allIds);
+    await this.caching.checkCacheForUserIds(allIds);
     
     const convertedConversations = result.conversations.map<ConversationWithUserMetadata<UserMetadata>>(conversation => {
       const userIdsWithUserMetadatas = conversation.userIds.map<ConversationUserIdWithUserMetadata<UserMetadata>>((userId) => {
-        const metadata = this.#caching.getUserMetadataFromCache(userId);
+        const metadata = this.caching.getUserMetadataFromCache(userId);
         
         return {
           userId,
@@ -184,10 +184,10 @@ export class FoshChatClient<UserMetadata> {
       return all;
     }, []);
   
-    await this.#caching.checkCacheForUserIds(allIds);
+    await this.caching.checkCacheForUserIds(allIds);
   
     const convertedMessages = result.messages.map<MessageDataWithUserMetadata<UserMetadata>>(message => {
-      const metadata = this.#caching.getUserMetadataFromCache(message.senderUserId);
+      const metadata = this.caching.getUserMetadataFromCache(message.senderUserId);
     
       return {
         ...message,
@@ -204,10 +204,10 @@ export class FoshChatClient<UserMetadata> {
   async getConversation(otherUserId: string): Promise<GetConversationResponseWithUserMetadata<UserMetadata>> {
     const result: GetConversationResponse = await this.Connection.invoke('GetConversation', otherUserId);
   
-    await this.#caching.checkCacheForUserIds(result.conversation.userIds);
+    await this.caching.checkCacheForUserIds(result.conversation.userIds);
     
     const newUserIds = result.conversation.userIds.map<ConversationUserIdWithUserMetadata<UserMetadata>>((userId) => {
-      const metadata = this.#caching.getUserMetadataFromCache(userId);
+      const metadata = this.caching.getUserMetadataFromCache(userId);
       
       return {
         userId,
@@ -234,8 +234,8 @@ export class FoshChatClient<UserMetadata> {
   
   // Event Handlers
   private async onPresenceUpdate(presenceUpdateData: PresenceUpdateData) {
-    await this.#caching.checkCacheForUserIds([presenceUpdateData.userId]);
-    const userMetadata = this.#caching.getUserMetadataFromCache(presenceUpdateData.userId);
+    await this.caching.checkCacheForUserIds([presenceUpdateData.userId]);
+    const userMetadata = this.caching.getUserMetadataFromCache(presenceUpdateData.userId);
     
     this.#eventEmitter.emit('presenceUpdate', {
       ...presenceUpdateData,
@@ -244,8 +244,8 @@ export class FoshChatClient<UserMetadata> {
   }
   
   private async onMessageReceived(messageRecievedData: MessageRecievedData) {
-    await this.#caching.checkCacheForUserIds([messageRecievedData.senderId]);
-    const userMetadata = this.#caching.getUserMetadataFromCache(messageRecievedData.senderId);
+    await this.caching.checkCacheForUserIds([messageRecievedData.senderId]);
+    const userMetadata = this.caching.getUserMetadataFromCache(messageRecievedData.senderId);
     
     this.#eventEmitter.emit('messageReceived', {
       ...messageRecievedData,
@@ -280,7 +280,7 @@ export class FoshChatClient<UserMetadata> {
   }
   
   get Connection(): HubConnection {
-    return this.#chatHub.Connection;
+    return this.chatHub.Connection;
   }
   
   // Internal
