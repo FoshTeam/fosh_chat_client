@@ -11,8 +11,10 @@ export class FoshChatCaching<UserMetadata> {
   }
   
   async checkCacheForUserIds(userIds: string[]) {
+    console.log('Checking caches for user ids: ', userIds);
+    
     const nonCachedUserIds = userIds.filter(userId => {
-      this.userCaches.some(cachedUserId => userId === cachedUserId.userId);
+      return this.userCaches.some(cachedUserId => userId === cachedUserId.userId);
     }).map<UserIdCache<UserMetadata>>(userId => {
       return {
         userId,
@@ -24,15 +26,15 @@ export class FoshChatCaching<UserMetadata> {
     await this.fetchUserMetadatas();
   }
   
-  async fetchUserMetadatas() {
+  async fetchUserMetadatas(): Promise<boolean> {
     if (this.getUserMetadataDelegate == null) {
-      return;
+      return false;
     }
     
     const uncachedUsers = this.userCaches.filter(cache => cache.state === CacheState.Uncached);
     
     if (uncachedUsers.length === 0) {
-      return;
+      return false;
     }
     
     const asyncActions = [];
@@ -48,9 +50,7 @@ export class FoshChatCaching<UserMetadata> {
     
     const results = await Promise.all(asyncActions);
     
-    if (results.length > 0) {
-    
-    }
+    return results.length > 0;
   }
   
   getUserMetadataFromCache(userId: string): UserMetadata | null {

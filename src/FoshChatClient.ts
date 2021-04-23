@@ -234,8 +234,6 @@ export class FoshChatClient<UserMetadata> {
   }
   
   private async onMessageReceived(messageRecievedData: MessageRecievedData) {
-    console.log(this);
-    console.log(this.caching);
     await this.caching.checkCacheForUserIds([messageRecievedData.senderId]);
     const userMetadata = this.caching.getUserMetadataFromCache(messageRecievedData.senderId);
     
