@@ -65,6 +65,13 @@ export class FoshChatClient<UserMetadata> {
       markAllMessagesAsRead: this.onMarkAllMessagesAsRead,
       conversationDeleted: this.onConversationDeleted
     });
+    
+    this.onPresenceUpdate = this.onPresenceUpdate.bind(this);
+    this.onMessageReceived = this.onMessageReceived.bind(this);
+    this.onMessageDeleted = this.onMessageDeleted.bind(this);
+    this.onMarkConversationAsRead = this.onMarkConversationAsRead.bind(this);
+    this.onMarkAllMessagesAsRead = this.onMarkAllMessagesAsRead.bind(this);
+    this.onConversationDeleted = this.onConversationDeleted.bind(this);
   }
   
   // Public Methods
