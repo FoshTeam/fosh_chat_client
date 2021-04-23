@@ -65,7 +65,12 @@ export class FoshChatCaching<UserMetadata> {
         const uncachedUser = uncachedUsers[index];
         
         if(uncachedUser != null) {
-          uncachedUser.state = typeof user != null ? CacheState.Cached : CacheState.Uncached;
+          if(user != null) {
+            uncachedUser.state = CacheState.Cached;
+            uncachedUser.metadata = user;
+          } else {
+            uncachedUser.state = CacheState.Uncached;
+          }
         }
       })
     }
