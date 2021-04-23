@@ -7,14 +7,14 @@ import {
 } from './ChatHub.Types';
 
 export class ChatHub {
-    #connection?: HubConnection;
+    connection?: HubConnection;
     
     set Connection(connection: HubConnection) {
-        this.#connection = connection;
+        this.connection = connection;
     }
     
     get Connection() {
-        return this.#connection!;
+        return this.connection!;
     }
 
     sendMessage(conversationId: string, message: string): Promise<void> {

@@ -1,18 +1,18 @@
 import {CacheState, GetUserMetadataFunc, UserIdCache} from './FoshChatCaching.Types';
 
 export class FoshChatCaching<UserMetadata> {
-  #userCaches: UserIdCache<UserMetadata>[];
+  userCaches: UserIdCache<UserMetadata>[];
   
-  readonly #getUserMetadataDelegate?: GetUserMetadataFunc<UserMetadata>;
+  readonly getUserMetadataDelegate?: GetUserMetadataFunc<UserMetadata>;
   
   constructor(getUserMetadataDelegate?: GetUserMetadataFunc<UserMetadata>) {
-    this.#userCaches = [];
-    this.#getUserMetadataDelegate = getUserMetadataDelegate;
+    this.userCaches = [];
+    this.getUserMetadataDelegate = getUserMetadataDelegate;
   }
   
   async checkCacheForUserIds(userIds: string[]) {
     const nonCachedUserIds = userIds.filter(userId => {
-      this.#userCaches.some(cachedUserId => userId === cachedUserId.userId);
+      this.userCaches.some(cachedUserId => userId === cachedUserId.userId);
     }).map<UserIdCache<UserMetadata>>(userId => {
       return {
         userId,
@@ -20,16 +20,16 @@ export class FoshChatCaching<UserMetadata> {
       };
     });
     
-    this.#userCaches = [...nonCachedUserIds, ...this.#userCaches];
+    this.userCaches = [...nonCachedUserIds, ...this.userCaches];
     await this.fetchUserMetadatas();
   }
   
   async fetchUserMetadatas() {
-    if (this.#getUserMetadataDelegate == null) {
+    if (this.getUserMetadataDelegate == null) {
       return;
     }
     
-    const uncachedUsers = this.#userCaches.filter(cache => cache.state === CacheState.Uncached);
+    const uncachedUsers = this.userCaches.filter(cache => cache.state === CacheState.Uncached);
     
     if (uncachedUsers.length === 0) {
       return;
@@ -40,7 +40,7 @@ export class FoshChatCaching<UserMetadata> {
     for (let uncachedUser of uncachedUsers) {
       uncachedUser.state = CacheState.Caching;
       
-      asyncActions.push(this.#getUserMetadataDelegate(uncachedUser.userId).catch(_ => {
+      asyncActions.push(this.getUserMetadataDelegate(uncachedUser.userId).catch(_ => {
           uncachedUser.state = CacheState.Uncached;
           return null;
       }));
@@ -54,7 +54,7 @@ export class FoshChatCaching<UserMetadata> {
   }
   
   getUserMetadataFromCache(userId: string): UserMetadata | null {
-    const foundUser = this.#userCaches.find(metadata => metadata.userId === userId && metadata.state === CacheState.Cached);
+    const foundUser = this.userCaches.find(metadata => metadata.userId === userId && metadata.state === CacheState.Cached);
     
     if (!foundUser) {
       return null;

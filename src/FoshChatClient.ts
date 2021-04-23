@@ -23,9 +23,9 @@ import {
 } from './FoshChatClient.Types';
 
 export class FoshChatClient<UserMetadata> {
-  readonly #eventEmitter: TypedEmitter<FoshChatClientEvents<UserMetadata>>;
+  readonly eventEmitter: TypedEmitter<FoshChatClientEvents<UserMetadata>>;
   
-  #connectionState: HubConnectionState;
+  connectionState: HubConnectionState;
   caching: FoshChatCaching<UserMetadata>;
   chatHub: ChatHub;
   
@@ -33,10 +33,10 @@ export class FoshChatClient<UserMetadata> {
   readonly #userJwt: string;
   
   constructor(appId: string, userJwt: string, getUserMetadataDelegate: GetUserMetadataFunc<UserMetadata>) {
-    this.#connectionState = HubConnectionState.Disconnected;
+    this.connectionState = HubConnectionState.Disconnected;
     this.caching = new FoshChatCaching<UserMetadata>(getUserMetadataDelegate);
     this.chatHub = new ChatHub();
-    this.#eventEmitter = new EventEmitter() as TypedEmitter<FoshChatClientEvents<UserMetadata>>;
+    this.eventEmitter = new EventEmitter() as TypedEmitter<FoshChatClientEvents<UserMetadata>>;
     
     this.#appId = appId;
     this.#userJwt = userJwt;
@@ -91,25 +91,25 @@ export class FoshChatClient<UserMetadata> {
   
   // Public Methods
   async Connect() {
-    this.#connectionState = HubConnectionState.Connecting;
-    this.#eventEmitter.emit('connectionStateChanged', this.#connectionState);
+    this.connectionState = HubConnectionState.Connecting;
+    this.eventEmitter.emit('connectionStateChanged', this.connectionState);
     try {
       await this.Connection.start();
-      this.#connectionState = HubConnectionState.Connected;
-      this.#eventEmitter.emit('connectionStateChanged', this.#connectionState);
+      this.connectionState = HubConnectionState.Connected;
+      this.eventEmitter.emit('connectionStateChanged', this.connectionState);
     } catch (e) {
-      this.#connectionState = HubConnectionState.Disconnected;
-      this.#eventEmitter.emit('connectionStateChanged', this.#connectionState);
+      this.connectionState = HubConnectionState.Disconnected;
+      this.eventEmitter.emit('connectionStateChanged', this.connectionState);
       console.log(e);
     }
   }
   
   async Disconnect() {
-    this.#connectionState = HubConnectionState.Disconnecting;
-    this.#eventEmitter.emit('connectionStateChanged', this.#connectionState);
+    this.connectionState = HubConnectionState.Disconnecting;
+    this.eventEmitter.emit('connectionStateChanged', this.connectionState);
     await this.Connection.stop();
-    this.#connectionState = HubConnectionState.Disconnected;
-    this.#eventEmitter.emit('connectionStateChanged', this.#connectionState);
+    this.connectionState = HubConnectionState.Disconnected;
+    this.eventEmitter.emit('connectionStateChanged', this.connectionState);
   }
   
   async sendMessage(conversationId: string, message: string): Promise<void> {
@@ -237,7 +237,7 @@ export class FoshChatClient<UserMetadata> {
     await this.caching.checkCacheForUserIds([presenceUpdateData.userId]);
     const userMetadata = this.caching.getUserMetadataFromCache(presenceUpdateData.userId);
     
-    this.#eventEmitter.emit('presenceUpdate', {
+    this.eventEmitter.emit('presenceUpdate', {
       ...presenceUpdateData,
       user: userMetadata
     });
@@ -247,36 +247,36 @@ export class FoshChatClient<UserMetadata> {
     await this.caching.checkCacheForUserIds([messageRecievedData.senderId]);
     const userMetadata = this.caching.getUserMetadataFromCache(messageRecievedData.senderId);
     
-    this.#eventEmitter.emit('messageReceived', {
+    this.eventEmitter.emit('messageReceived', {
       ...messageRecievedData,
       user: userMetadata
     });
   }
   
   private onMessageDeleted(messageDeletedData: MessageDeletedData) {
-    this.#eventEmitter.emit('messageDeleted', messageDeletedData);
+    this.eventEmitter.emit('messageDeleted', messageDeletedData);
   }
   
   private onMarkConversationAsRead(markConversationAsReadData: MarkConversationAsReadData) {
-    this.#eventEmitter.emit('markConversationAsRead', markConversationAsReadData);
+    this.eventEmitter.emit('markConversationAsRead', markConversationAsReadData);
   }
   
   private onMarkAllMessagesAsRead() {
-    this.#eventEmitter.emit('markAllMessagesAsRead');
+    this.eventEmitter.emit('markAllMessagesAsRead');
   }
   
   private onConversationDeleted(conversationDeletedData: ConversationDeletedData) {
-    this.#eventEmitter.emit('conversationDeleted', conversationDeletedData);
+    this.eventEmitter.emit('conversationDeleted', conversationDeletedData);
   }
   
   
   // Getters
   get ConnectionState(): HubConnectionState {
-    return this.#connectionState;
+    return this.connectionState;
   }
   
   get Events(): TypedEmitter<FoshChatClientEvents<UserMetadata>> {
-    return this.#eventEmitter;
+    return this.eventEmitter;
   }
   
   get Connection(): HubConnection {
@@ -285,17 +285,17 @@ export class FoshChatClient<UserMetadata> {
   
   // Internal
   private onReconnected() {
-    this.#connectionState = HubConnectionState.Connected;
-    this.#eventEmitter.emit('connectionStateChanged', this.#connectionState);
+    this.connectionState = HubConnectionState.Connected;
+    this.eventEmitter.emit('connectionStateChanged', this.connectionState);
   }
   
   private onReconnecting() {
-    this.#connectionState = HubConnectionState.Reconnecting;
-    this.#eventEmitter.emit('connectionStateChanged', this.#connectionState);
+    this.connectionState = HubConnectionState.Reconnecting;
+    this.eventEmitter.emit('connectionStateChanged', this.connectionState);
   }
   
   private onClose() {
-    this.#connectionState = HubConnectionState.Disconnected;
-    this.#eventEmitter.emit('connectionStateChanged', this.#connectionState);
+    this.connectionState = HubConnectionState.Disconnected;
+    this.eventEmitter.emit('connectionStateChanged', this.connectionState);
   }
 }
