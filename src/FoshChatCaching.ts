@@ -14,7 +14,7 @@ export class FoshChatCaching<UserMetadata> {
     console.log('Checking cache for user ids: ', userIds);
     
     const nonCachedUserIds = userIds.filter(userId => {
-      return this.userCaches.some(cachedUserId => {
+      return !this.userCaches.some(cachedUserId => {
         console.log(`UserId(${userId}) === cachedUserId.userId(${cachedUserId.userId})`, cachedUserId)
         return userId === cachedUserId.userId;
       });
