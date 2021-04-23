@@ -74,12 +74,15 @@ export class FoshChatCaching<UserMetadata> {
   }
   
   getUserMetadataFromCache(userId: string): UserMetadata | null {
-    const foundUser = this.userCaches.find(metadata => metadata.userId === userId && metadata.state === CacheState.Cached);
+    const foundUser = this.userCaches.find(metadata => {
+      console.log(`metadata.userId(${metadata.userId}) === userId(${userId}) && metadata.state${metadata.state} === CacheState.Cached`);
+      return metadata.userId === userId && metadata.state === CacheState.Cached;
+    });
     
     if (!foundUser) {
       return null;
     }
     
-    return foundUser.metadata!;
+    return foundUser.metadata ?? null;
   }
 }
