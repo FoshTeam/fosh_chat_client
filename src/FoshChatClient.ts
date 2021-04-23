@@ -58,20 +58,13 @@ export class FoshChatClient<UserMetadata> {
     this.Connection.onclose(this.onClose.bind(this));
   
     this.chatHub.registerCallbacks({
-      presenceUpdate: this.onPresenceUpdate,
-      messageRecieved: this.onMessageReceived,
-      messageDeleted: this.onMessageDeleted,
-      markConversationAsRead: this.onMarkConversationAsRead,
-      markAllMessagesAsRead: this.onMarkAllMessagesAsRead,
-      conversationDeleted: this.onConversationDeleted
+      presenceUpdate: this.onPresenceUpdate.bind(this),
+      messageRecieved: this.onMessageReceived.bind(this),
+      messageDeleted: this.onMessageDeleted.bind(this),
+      markConversationAsRead: this.onMarkConversationAsRead.bind(this),
+      markAllMessagesAsRead: this.onMarkAllMessagesAsRead.bind(this),
+      conversationDeleted: this.onConversationDeleted.bind(this)
     });
-    
-    this.onPresenceUpdate = this.onPresenceUpdate.bind(this);
-    this.onMessageReceived = this.onMessageReceived.bind(this);
-    this.onMessageDeleted = this.onMessageDeleted.bind(this);
-    this.onMarkConversationAsRead = this.onMarkConversationAsRead.bind(this);
-    this.onMarkAllMessagesAsRead = this.onMarkAllMessagesAsRead.bind(this);
-    this.onConversationDeleted = this.onConversationDeleted.bind(this);
     
     this.Connect = this.Connect.bind(this);
     this.Disconnect = this.Disconnect.bind(this);
@@ -84,9 +77,6 @@ export class FoshChatClient<UserMetadata> {
     this.getConversation = this.getConversation.bind(this);
     this.subscribeToPresence = this.subscribeToPresence.bind(this);
     this.unsubscribeFromPresence = this.unsubscribeFromPresence.bind(this);
-    this.onReconnected = this.onReconnected.bind(this);
-    this.onReconnecting = this.onReconnecting.bind(this);
-    this.onClose = this.onClose.bind(this);
   }
   
   // Public Methods
