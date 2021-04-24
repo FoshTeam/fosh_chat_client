@@ -30,20 +30,20 @@ export class FoshChatClient<UserMetadata> {
   chatHub: ChatHub;
   
   readonly #appId: string;
-  readonly #userJwt: string;
   
-  constructor(appId: string, userJwt: string, getUserMetadataDelegate: GetUserMetadataFunc<UserMetadata>) {
+  #userJwt?: string;
+  
+  constructor(appId: string, getUserMetadataDelegate: GetUserMetadataFunc<UserMetadata>) {
     this.connectionState = HubConnectionState.Disconnected;
     this.caching = new FoshChatCaching<UserMetadata>(getUserMetadataDelegate);
     this.chatHub = new ChatHub();
     this.eventEmitter = new EventEmitter() as TypedEmitter<FoshChatClientEvents<UserMetadata>>;
     
     this.#appId = appId;
-    this.#userJwt = userJwt;
   
     this.chatHub.Connection = new HubConnectionBuilder()
       .withUrl(`${Config.ConnectionUrl}?appId=${this.#appId}`, {
-        accessTokenFactory: () => this.#userJwt,
+        accessTokenFactory: this.getUserJwt,
         transport: HttpTransportType.WebSockets,
         skipNegotiation: true,
         withCredentials: false
@@ -100,6 +100,14 @@ export class FoshChatClient<UserMetadata> {
     await this.Connection.stop();
     this.connectionState = HubConnectionState.Disconnected;
     this.eventEmitter.emit('connectionStateChanged', this.connectionState);
+  }
+  
+  setUserJwt(newJwt: string) {
+    this.#userJwt = newJwt;
+  }
+  
+  getUserJwt() {
+    return this.#userJwt ?? '';
   }
   
   async sendMessage(conversationId: string, message: string): Promise<void> {
