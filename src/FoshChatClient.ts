@@ -35,7 +35,10 @@ export class FoshChatClient<UserMetadata> {
   readonly #appId: string;
   #connectionBuilder: HubConnectionBuilder;
   
+  connectionUrl: string;
+  
   constructor(appId: string, getUserMetadataDelegate: GetUserMetadataFunc<UserMetadata>) {
+    this.connectionUrl = '';
     this.connectionState = HubConnectionState.Disconnected;
     this.caching = new FoshChatCaching<UserMetadata>(getUserMetadataDelegate);
     this.chatHub = new ChatHub();
@@ -47,6 +50,8 @@ export class FoshChatClient<UserMetadata> {
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: () => 2500
       });
+    
+    this.getWithUrlParams = this.getWithUrlParams.bind(this);
     
     this.Connect = this.Connect.bind(this);
     this.Disconnect = this.Disconnect.bind(this);
@@ -79,8 +84,10 @@ export class FoshChatClient<UserMetadata> {
   }
   
   getWithUrlParams() {
+    const url = this.connectionUrl === '' ? Config.ConnectionUrl : this.connectionUrl;
+    
     return {
-      url: `${Config.ConnectionUrl}?appId=${this.#appId}`,
+      url: `${url}?appId=${this.#appId}`,
       options: {
         accessTokenFactory: this.getUserJwt,
         transport: HttpTransportType.WebSockets,
@@ -136,6 +143,14 @@ export class FoshChatClient<UserMetadata> {
     this.chatHub.unregisterCallbacks(this.getCallbacks());
     this.connectionState = HubConnectionState.Disconnected;
     this.eventEmitter.emit('connectionStateChanged', this.connectionState);
+  }
+  
+  setConnectionUrl(newConnectionUrl: string) {
+    this.connectionUrl = newConnectionUrl;
+  }
+  
+  getConnectionUrl(): string {
+    return this.connectionUrl;
   }
   
   setUserJwt(newJwt: string) {
