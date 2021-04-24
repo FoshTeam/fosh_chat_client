@@ -84,6 +84,8 @@ export class FoshChatClient<UserMetadata> {
   
   // Public Methods
   async Connect() {
+    console.log(this.getUserJwt());
+    
     this.connectionState = HubConnectionState.Connecting;
     this.eventEmitter.emit('connectionStateChanged', this.connectionState);
     try {
@@ -110,6 +112,8 @@ export class FoshChatClient<UserMetadata> {
   }
   
   getUserJwt() {
+    console.log('User JWT GET:');
+    console.log(this.userJwt);
     return this.userJwt ?? '';
   }
   
