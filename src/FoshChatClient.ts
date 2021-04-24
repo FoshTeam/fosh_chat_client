@@ -1,12 +1,12 @@
-import {HttpTransportType, HubConnection, HubConnectionState, HubConnectionBuilder} from '@microsoft/signalr';
+import {HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionState} from '@microsoft/signalr';
 import {ChatHub} from './hubs/ChatHub';
 import Config from './Config';
 import {GetUserMetadataFunc} from './FoshChatCaching.Types';
 import {FoshChatCaching} from './FoshChatCaching';
 import {
   ConversationDeletedData,
-  GetConversationResponse,
   GetConversationMessagesResponse,
+  GetConversationResponse,
   GetConversationsResponse,
   MarkConversationAsReadData,
   MessageDeletedData,
@@ -17,9 +17,12 @@ import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 import {
   ConversationUserIdWithUserMetadata,
-  ConversationWithUserMetadata, FoshChatClientEvents,
-  GetConversationMessagesResponseWithUserMetadata, GetConversationResponseWithUserMetadata,
-  GetConversationsResponseWithUserMetadata, MessageDataWithUserMetadata
+  ConversationWithUserMetadata,
+  FoshChatClientEvents,
+  GetConversationMessagesResponseWithUserMetadata,
+  GetConversationResponseWithUserMetadata,
+  GetConversationsResponseWithUserMetadata,
+  MessageDataWithUserMetadata
 } from './FoshChatClient.Types';
 
 export class FoshChatClient<UserMetadata> {
@@ -28,10 +31,9 @@ export class FoshChatClient<UserMetadata> {
   connectionState: HubConnectionState;
   caching: FoshChatCaching<UserMetadata>;
   chatHub: ChatHub;
-  
-  readonly #appId: string;
-  
   userJwt?: string;
+  readonly #appId: string;
+  #connectionBuilder: HubConnectionBuilder;
   
   constructor(appId: string, getUserMetadataDelegate: GetUserMetadataFunc<UserMetadata>) {
     this.connectionState = HubConnectionState.Disconnected;
@@ -40,31 +42,11 @@ export class FoshChatClient<UserMetadata> {
     this.eventEmitter = new EventEmitter() as TypedEmitter<FoshChatClientEvents<UserMetadata>>;
     
     this.#appId = appId;
-  
-    this.chatHub.Connection = new HubConnectionBuilder()
-      .withUrl(`${Config.ConnectionUrl}?appId=${this.#appId}`, {
-        accessTokenFactory: this.getUserJwt,
-        transport: HttpTransportType.WebSockets,
-        skipNegotiation: true,
-        withCredentials: false
-      })
+    
+    this.#connectionBuilder = new HubConnectionBuilder()
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: () => 2500
-      })
-      .build();
-  
-    this.Connection.onreconnected(this.onReconnected.bind(this));
-    this.Connection.onreconnecting(this.onReconnecting.bind(this));
-    this.Connection.onclose(this.onClose.bind(this));
-  
-    this.chatHub.registerCallbacks({
-      presenceUpdate: this.onPresenceUpdate.bind(this),
-      messageRecieved: this.onMessageReceived.bind(this),
-      messageDeleted: this.onMessageDeleted.bind(this),
-      markConversationAsRead: this.onMarkConversationAsRead.bind(this),
-      markAllMessagesAsRead: this.onMarkAllMessagesAsRead.bind(this),
-      conversationDeleted: this.onConversationDeleted.bind(this)
-    });
+      });
     
     this.Connect = this.Connect.bind(this);
     this.Disconnect = this.Disconnect.bind(this);
@@ -80,6 +62,43 @@ export class FoshChatClient<UserMetadata> {
     
     this.setUserJwt = this.setUserJwt.bind(this);
     this.getUserJwt = this.getUserJwt.bind(this);
+    this.getCallbacks = this.getCallbacks.bind(this);
+  }
+  
+  // Getters
+  get ConnectionState(): HubConnectionState {
+    return this.connectionState;
+  }
+  
+  get Events(): TypedEmitter<FoshChatClientEvents<UserMetadata>> {
+    return this.eventEmitter;
+  }
+  
+  get Connection(): HubConnection {
+    return this.chatHub.Connection;
+  }
+  
+  getWithUrlParams() {
+    return {
+      url: `${Config.ConnectionUrl}?appId=${this.#appId}`,
+      options: {
+        accessTokenFactory: this.getUserJwt,
+        transport: HttpTransportType.WebSockets,
+        skipNegotiation: true,
+        withCredentials: false
+      }
+    }
+  }
+  
+  getCallbacks() {
+    return{
+      presenceUpdate: this.onPresenceUpdate.bind(this),
+      messageRecieved: this.onMessageReceived.bind(this),
+      messageDeleted: this.onMessageDeleted.bind(this),
+      markConversationAsRead: this.onMarkConversationAsRead.bind(this),
+      markAllMessagesAsRead: this.onMarkAllMessagesAsRead.bind(this),
+      conversationDeleted: this.onConversationDeleted.bind(this)
+    };
   }
   
   // Public Methods
@@ -89,10 +108,21 @@ export class FoshChatClient<UserMetadata> {
     this.connectionState = HubConnectionState.Connecting;
     this.eventEmitter.emit('connectionStateChanged', this.connectionState);
     try {
+      const {url, options} = this.getWithUrlParams();
+      
+      this.chatHub.Connection = this.#connectionBuilder.withUrl(url, options).build();
+      
+      this.chatHub.Connection.onreconnected(this.onReconnected.bind(this));
+      this.chatHub.Connection.onreconnecting(this.onReconnecting.bind(this));
+      this.chatHub.Connection.onclose(this.onClose.bind(this));
+  
+      this.chatHub.registerCallbacks(this.getCallbacks());
+      
       await this.Connection.start();
       this.connectionState = HubConnectionState.Connected;
       this.eventEmitter.emit('connectionStateChanged', this.connectionState);
     } catch (e) {
+      this.chatHub.unregisterCallbacks(this.getCallbacks());
       this.connectionState = HubConnectionState.Disconnected;
       this.eventEmitter.emit('connectionStateChanged', this.connectionState);
       console.log(e);
@@ -103,6 +133,7 @@ export class FoshChatClient<UserMetadata> {
     this.connectionState = HubConnectionState.Disconnecting;
     this.eventEmitter.emit('connectionStateChanged', this.connectionState);
     await this.Connection.stop();
+    this.chatHub.unregisterCallbacks(this.getCallbacks());
     this.connectionState = HubConnectionState.Disconnected;
     this.eventEmitter.emit('connectionStateChanged', this.connectionState);
   }
@@ -142,7 +173,7 @@ export class FoshChatClient<UserMetadata> {
     
     let allIds = result.conversations.reduce<string[]>((all, cur) => {
       cur.userIds.forEach(userId => {
-        if( all.indexOf(userId) === 0 ) {
+        if (all.indexOf(userId) === 0) {
           all = [...all, userId];
         }
       });
@@ -159,7 +190,7 @@ export class FoshChatClient<UserMetadata> {
         return {
           userId,
           user: metadata
-        }
+        };
       });
       
       return {
@@ -169,31 +200,31 @@ export class FoshChatClient<UserMetadata> {
         unreadMessageCount: conversation.unreadMessageCount,
         updatedAt: conversation.updatedAt,
         userIds: userIdsWithUserMetadatas
-      }
+      };
     });
     
     return {
       isMoreConversationsAvailable: result.isMoreConversationsAvailable,
       conversations: convertedConversations
-    }
+    };
   }
   
   async getConversationMessages(conversationId: string, lastMessageTimestamp?: Date): Promise<GetConversationMessagesResponseWithUserMetadata<UserMetadata>> {
     const result: GetConversationMessagesResponse = await this.Connection.invoke('GetConversationMessages', conversationId, lastMessageTimestamp ?? null);
-  
+    
     let allIds = result.messages.reduce<string[]>((all, cur) => {
-      if( all.indexOf(cur.senderUserId) === 0 ) {
+      if (all.indexOf(cur.senderUserId) === 0) {
         all = [...all, cur.senderUserId];
       }
       
       return all;
     }, []);
-  
+    
     await this.caching.checkCacheForUserIds(allIds);
-  
+    
     const convertedMessages = result.messages.map<MessageDataWithUserMetadata<UserMetadata>>(message => {
       const metadata = this.caching.getUserMetadataFromCache(message.senderUserId);
-    
+      
       return {
         ...message,
         user: metadata
@@ -203,12 +234,12 @@ export class FoshChatClient<UserMetadata> {
     return {
       ...result,
       messages: convertedMessages
-    }
+    };
   }
   
   async getConversation(otherUserId: string): Promise<GetConversationResponseWithUserMetadata<UserMetadata>> {
     const result: GetConversationResponse = await this.Connection.invoke('GetConversation', otherUserId);
-  
+    
     await this.caching.checkCacheForUserIds(result.conversation.userIds);
     
     const newUserIds = result.conversation.userIds.map<ConversationUserIdWithUserMetadata<UserMetadata>>((userId) => {
@@ -235,7 +266,6 @@ export class FoshChatClient<UserMetadata> {
   async unsubscribeFromPresence(otherUserId: string[]): Promise<void> {
     return await this.Connection.invoke('UnsubscribeFromPresence', otherUserId);
   }
-  
   
   // Event Handlers
   private async onPresenceUpdate(presenceUpdateData: PresenceUpdateData) {
@@ -272,20 +302,6 @@ export class FoshChatClient<UserMetadata> {
   
   private onConversationDeleted(conversationDeletedData: ConversationDeletedData) {
     this.eventEmitter.emit('conversationDeleted', conversationDeletedData);
-  }
-  
-  
-  // Getters
-  get ConnectionState(): HubConnectionState {
-    return this.connectionState;
-  }
-  
-  get Events(): TypedEmitter<FoshChatClientEvents<UserMetadata>> {
-    return this.eventEmitter;
-  }
-  
-  get Connection(): HubConnection {
-    return this.chatHub.Connection;
   }
   
   // Internal
