@@ -31,7 +31,7 @@ export class FoshChatClient<UserMetadata> {
   
   readonly #appId: string;
   
-  #userJwt?: string;
+  userJwt?: string;
   
   constructor(appId: string, getUserMetadataDelegate: GetUserMetadataFunc<UserMetadata>) {
     this.connectionState = HubConnectionState.Disconnected;
@@ -77,6 +77,9 @@ export class FoshChatClient<UserMetadata> {
     this.getConversation = this.getConversation.bind(this);
     this.subscribeToPresence = this.subscribeToPresence.bind(this);
     this.unsubscribeFromPresence = this.unsubscribeFromPresence.bind(this);
+    
+    this.setUserJwt = this.setUserJwt.bind(this);
+    this.getUserJwt = this.getUserJwt.bind(this);
   }
   
   // Public Methods
@@ -103,11 +106,11 @@ export class FoshChatClient<UserMetadata> {
   }
   
   setUserJwt(newJwt: string) {
-    this.#userJwt = newJwt;
+    this.userJwt = newJwt;
   }
   
   getUserJwt() {
-    return this.#userJwt ?? '';
+    return this.userJwt ?? '';
   }
   
   async sendMessage(conversationId: string, message: string): Promise<void> {
