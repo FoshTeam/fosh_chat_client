@@ -188,7 +188,7 @@ export class FoshChatClient<UserMetadata> {
     
     let allIds = result.conversations.reduce<string[]>((all, cur) => {
       cur.userIds.forEach(userId => {
-        if (all.indexOf(userId) === 0) {
+        if (all.indexOf(userId) === -1) {
           all = [...all, userId];
         }
       });
@@ -228,7 +228,7 @@ export class FoshChatClient<UserMetadata> {
     const result: GetConversationMessagesResponse = await this.Connection.invoke('GetConversationMessages', conversationId, lastMessageTimestamp ?? null);
     
     let allIds = result.messages.reduce<string[]>((all, cur) => {
-      if (all.indexOf(cur.senderUserId) === 0) {
+      if (all.indexOf(cur.senderUserId) === -1) {
         all = [...all, cur.senderUserId];
       }
       
