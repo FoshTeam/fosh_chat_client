@@ -1,10 +1,27 @@
 export interface IChatHubCallbacks {
-  conversationDeleted(conversationDeletedData: ConversationDeletedData): void;
-  messageDeleted(messageDeletedData: MessageDeletedData): void;
-  markAllMessagesAsRead(): void;
-  markConversationAsRead(markConversationAsReadData: MarkConversationAsReadData): void;
-  messageRecieved(messageRecievedData: MessageRecievedData): void;
-  presenceUpdate(presenceUpdateData: PresenceUpdateData): void;
+  conversationDeleted?: (conversationDeletedData: ConversationDeletedData) => void;
+  messageDeleted?: (messageDeletedData: MessageDeletedData) => void;
+  markAllMessagesAsRead?: () => void;
+  markConversationAsRead?: (markConversationAsReadData: MarkConversationAsReadData) => void;
+  messageReceived?: (messageReceivedData: MessageReceivedData) => void;
+  presenceUpdate?: (presenceUpdateData: PresenceUpdateData) => void;
+  
+  groupInfoUpdated?: (groupInfoUpdatedData: GroupInfoUpdatedData) => void;
+  groupMessageReceived: (groupMessageReceivedData: GroupMessageReceivedData) => void;
+}
+
+export interface GroupMessageReceivedData
+{
+  groupId: string;
+  senderId: string;
+  message: string;
+  messageTime: string;
+}
+
+export interface GroupInfoUpdatedData
+{
+  groupId: string;
+  totalUserCount: number;
 }
 
 export interface GetConversationsResponse {
@@ -51,7 +68,7 @@ export interface MarkConversationAsReadData {
   conversationId: string;
 }
 
-export interface MessageRecievedData {
+export interface MessageReceivedData {
   messageId: string;
   senderId: string;
   conversationId: string;

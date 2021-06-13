@@ -7,10 +7,10 @@ import {
   ConversationDeletedData,
   GetConversationMessagesResponse,
   GetConversationResponse,
-  GetConversationsResponse,
+  GetConversationsResponse, GroupInfoUpdatedData, GroupMessageReceivedData,
   MarkConversationAsReadData,
   MessageDeletedData,
-  MessageRecievedData,
+  MessageReceivedData,
   PresenceUpdateData
 } from './hubs/ChatHub.Types';
 import EventEmitter from 'events';
@@ -98,13 +98,15 @@ export class FoshChatClient<UserMetadata> {
   }
   
   getCallbacks() {
-    return{
+    return {
       presenceUpdate: this.onPresenceUpdate.bind(this),
-      messageRecieved: this.onMessageReceived.bind(this),
+      messageReceived: this.onMessageReceived.bind(this),
       messageDeleted: this.onMessageDeleted.bind(this),
       markConversationAsRead: this.onMarkConversationAsRead.bind(this),
       markAllMessagesAsRead: this.onMarkAllMessagesAsRead.bind(this),
-      conversationDeleted: this.onConversationDeleted.bind(this)
+      conversationDeleted: this.onConversationDeleted.bind(this),
+      groupInfoUpdated: this.onGroupInfoUpdated.bind(this),
+      groupMessageReceived: this.onGroupMessageReceived.bind(this)
     };
   }
   
@@ -293,12 +295,12 @@ export class FoshChatClient<UserMetadata> {
     });
   }
   
-  private async onMessageReceived(messageRecievedData: MessageRecievedData) {
-    await this.caching.checkCacheForUserIds([messageRecievedData.senderId]);
-    const userMetadata = this.caching.getUserMetadataFromCache(messageRecievedData.senderId);
+  private async onMessageReceived(messageReceivedData: MessageReceivedData) {
+    await this.caching.checkCacheForUserIds([messageReceivedData.senderId]);
+    const userMetadata = this.caching.getUserMetadataFromCache(messageReceivedData.senderId);
     
     this.eventEmitter.emit('messageReceived', {
-      ...messageRecievedData,
+      ...messageReceivedData,
       user: userMetadata
     });
   }
@@ -317,6 +319,20 @@ export class FoshChatClient<UserMetadata> {
   
   private onConversationDeleted(conversationDeletedData: ConversationDeletedData) {
     this.eventEmitter.emit('conversationDeleted', conversationDeletedData);
+  }
+  
+  private onGroupInfoUpdated(groupInfoUpdatedData: GroupInfoUpdatedData) {
+    this.eventEmitter.emit('groupInfoUpdated', groupInfoUpdatedData);
+  }
+  
+  private async onGroupMessageReceived(groupMessageReceivedData: GroupMessageReceivedData) {
+    await this.caching.checkCacheForUserIds([groupMessageReceivedData.senderId]);
+    const userMetadata = this.caching.getUserMetadataFromCache(groupMessageReceivedData.senderId);
+    
+    this.eventEmitter.emit('groupMessageReceived', {
+      ...groupMessageReceivedData,
+      user: userMetadata
+    });
   }
   
   // Internal
