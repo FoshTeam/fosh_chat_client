@@ -8,7 +8,7 @@ import {
     MessageDeletedData,
     MarkConversationAsReadData,
     MessageReceivedData,
-    PresenceUpdateData, GroupInfoUpdatedData, GroupMessageReceivedData
+    PresenceUpdateData, GroupInfoUpdatedData, GroupMessageReceivedData, SystemMessageReceivedData
 } from './ChatHub.Types';
 import {ChatHubUtils} from './ChatHub.Utils';
 
@@ -106,6 +106,10 @@ export class ChatHub {
     groupMessageReceivedImplementationFn(implementation: IChatHubCallbacks, groupMessageReceivedData: GroupMessageReceivedData) {
         ChatHubUtils.CallIfFunction(implementation.groupMessageReceived, groupMessageReceivedData);
     }
+    
+    systemMessageReceivedImplementationFn(implementation: IChatHubCallbacks, systemMessageReceivedData: SystemMessageReceivedData) {
+        ChatHubUtils.CallIfFunction(implementation.systemMessageReceived, systemMessageReceivedData);
+    }
 
     registerCallbacks(implementation: IChatHubCallbacks) {
         this.Connection.on('ConversationDeleted', this.conversationDeletedImplementationFn.bind(this, implementation));
@@ -116,6 +120,7 @@ export class ChatHub {
         this.Connection.on('PresenceUpdate', this.presenceUpdateImplementationFn.bind(this, implementation));
         this.Connection.on('GroupInfoUpdated', this.groupInfoUpdatedImplementationFn.bind(this, implementation));
         this.Connection.on('GroupMessageReceived', this.groupMessageReceivedImplementationFn.bind(this, implementation));
+        this.Connection.on('SystemMessage', this.systemMessageReceivedImplementationFn.bind(this, implementation));
     }
 
     unregisterCallbacks(implementation: IChatHubCallbacks) {
@@ -127,5 +132,6 @@ export class ChatHub {
         this.Connection.off('PresenceUpdate', this.presenceUpdateImplementationFn.bind(this, implementation));
         this.Connection.off('GroupInfoUpdated', this.groupInfoUpdatedImplementationFn.bind(this, implementation));
         this.Connection.off('GroupMessageReceived', this.groupMessageReceivedImplementationFn.bind(this, implementation));
+        this.Connection.off('SystemMessage', this.systemMessageReceivedImplementationFn.bind(this, implementation));
     }
 }

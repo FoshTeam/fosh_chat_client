@@ -7,7 +7,9 @@ export interface IChatHubCallbacks {
   presenceUpdate?: (presenceUpdateData: PresenceUpdateData) => void;
   
   groupInfoUpdated?: (groupInfoUpdatedData: GroupInfoUpdatedData) => void;
-  groupMessageReceived: (groupMessageReceivedData: GroupMessageReceivedData) => void;
+  groupMessageReceived?: (groupMessageReceivedData: GroupMessageReceivedData) => void;
+  
+  systemMessageReceived?: (systemMessageReceivedData: SystemMessageReceivedData) => void;
 }
 
 export interface GroupMessageReceivedData
@@ -74,6 +76,12 @@ export interface MessageReceivedData {
   conversationId: string;
   message: string;
   messageTime: Date;
+}
+
+export interface SystemMessageReceivedData {
+  sender: "System";
+  type: string;
+  message: string;
 }
 
 export interface PresenceUpdateData {

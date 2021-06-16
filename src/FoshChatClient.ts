@@ -11,7 +11,7 @@ import {
   MarkConversationAsReadData,
   MessageDeletedData,
   MessageReceivedData,
-  PresenceUpdateData
+  PresenceUpdateData, SystemMessageReceivedData
 } from './hubs/ChatHub.Types';
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
@@ -106,7 +106,8 @@ export class FoshChatClient<UserMetadata> {
       markAllMessagesAsRead: this.onMarkAllMessagesAsRead.bind(this),
       conversationDeleted: this.onConversationDeleted.bind(this),
       groupInfoUpdated: this.onGroupInfoUpdated.bind(this),
-      groupMessageReceived: this.onGroupMessageReceived.bind(this)
+      groupMessageReceived: this.onGroupMessageReceived.bind(this),
+      systemMessageReceived: this.onSystemMessageReceived.bind(this)
     };
   }
   
@@ -333,6 +334,10 @@ export class FoshChatClient<UserMetadata> {
       ...groupMessageReceivedData,
       user: userMetadata
     });
+  }
+  
+  private onSystemMessageReceived(systemData: SystemMessageReceivedData) {
+    this.eventEmitter.emit('systemMessageReceived', systemData);
   }
   
   // Internal

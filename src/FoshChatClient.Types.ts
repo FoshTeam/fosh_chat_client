@@ -4,7 +4,7 @@ import {
   GetConversationsResponse, GroupInfoUpdatedData, GroupMessageReceivedData, MarkConversationAsReadData,
   MessageData, MessageDeletedData,
   MessageReceivedData,
-  PresenceUpdateData
+  PresenceUpdateData, SystemMessageReceivedData
 } from './hubs/ChatHub.Types';
 import {HubConnectionState} from '@microsoft/signalr';
 
@@ -48,4 +48,5 @@ export interface FoshChatClientEvents<UserMetadata> {
   connectionStateChanged: (newState: HubConnectionState) => void;
   groupInfoUpdated: (groupInfoUpdatedData: GroupInfoUpdatedData) => void;
   groupMessageReceived: (groupMessageReceivedData: GroupMessageReceivedWithUserMetadata<UserMetadata>) => void;
+  systemMessageReceived: (systemMessageReceivedData: SystemMessageReceivedData) => void;
 }
