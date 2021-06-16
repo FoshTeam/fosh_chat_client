@@ -64,6 +64,9 @@ export class FoshChatClient<UserMetadata> {
     this.getConversation = this.getConversation.bind(this);
     this.subscribeToPresence = this.subscribeToPresence.bind(this);
     this.unsubscribeFromPresence = this.unsubscribeFromPresence.bind(this);
+    this.joinToGroup = this.joinToGroup.bind(this);
+    this.leaveFromGroup = this.leaveFromGroup.bind(this);
+    this.sendMessageToGroup = this.sendMessageToGroup.bind(this);
     
     this.setUserJwt = this.setUserJwt.bind(this);
     this.getUserJwt = this.getUserJwt.bind(this);
@@ -283,6 +286,18 @@ export class FoshChatClient<UserMetadata> {
   
   async unsubscribeFromPresence(otherUserId: string[]): Promise<void> {
     return await this.Connection.invoke('UnsubscribeFromPresence', otherUserId);
+  }
+  
+  async joinToGroup(groupId: string): Promise<void> {
+    return await this.Connection.invoke('AddToGroup', groupId);
+  }
+  
+  async leaveFromGroup(groupId: string): Promise<void> {
+    return await this.Connection.invoke('RemoveFromGroup', groupId);
+  }
+  
+  async sendMessageToGroup(groupId: string, message: string): Promise<void> {
+    return await this.Connection.invoke('SendMessageToGroup', groupId, message);
   }
   
   // Event Handlers
