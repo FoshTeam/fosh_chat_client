@@ -92,7 +92,7 @@ export class ChatHub {
     }
     
     messageReceivedImplementationFn(implementation: IChatHubCallbacks, messageReceivedData: MessageReceivedData) {
-        ChatHubUtils.CallIfFunction(implementation.markConversationAsRead, messageReceivedData);
+        ChatHubUtils.CallIfFunction(implementation.messageReceived, messageReceivedData);
     }
     
     presenceUpdateImplementationFn(implementation: IChatHubCallbacks, presenceUpdateData: PresenceUpdateData) {
