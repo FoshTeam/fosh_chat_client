@@ -1,4 +1,4 @@
-import {CacheState, GetUserMetadataFunc, UserIdCache} from './FoshChatCaching.Types';
+import {CacheState, GetUserMetadataFunc, UserIdCache} from './FoshChatCaching.Types.js';
 
 export class FoshChatCaching<UserMetadata> {
   userCaches: UserIdCache<UserMetadata>[];

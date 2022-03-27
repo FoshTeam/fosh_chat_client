@@ -1,4 +1,4 @@
-import {FoshChatClient} from './FoshChatClient';
+import {FoshChatClient} from './FoshChatClient.js';
 
 export default FoshChatClient;
 export {FoshChatClient};

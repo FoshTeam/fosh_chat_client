@@ -1,8 +1,8 @@
 import {HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionState} from '@microsoft/signalr';
-import {ChatHub} from './hubs/ChatHub';
-import Config from './Config';
-import {GetUserMetadataFunc} from './FoshChatCaching.Types';
-import {FoshChatCaching} from './FoshChatCaching';
+import {ChatHub} from './hubs/ChatHub.js';
+import Config from './Config.js';
+import {GetUserMetadataFunc} from './FoshChatCaching.Types.js';
+import {FoshChatCaching} from './FoshChatCaching.js';
 import {
   ConversationDeletedData,
   GetConversationMessagesResponse,
@@ -12,7 +12,7 @@ import {
   MessageDeletedData,
   MessageReceivedData,
   PresenceUpdateData, SystemMessageReceivedData
-} from './hubs/ChatHub.Types';
+} from './hubs/ChatHub.Types.js';
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 import {
@@ -23,7 +23,7 @@ import {
   GetConversationResponseWithUserMetadata,
   GetConversationsResponseWithUserMetadata,
   MessageDataWithUserMetadata
-} from './FoshChatClient.Types';
+} from './FoshChatClient.Types.js';
 
 export class FoshChatClient<UserMetadata> {
   readonly eventEmitter: TypedEmitter<FoshChatClientEvents<UserMetadata>>;

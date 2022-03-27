@@ -9,8 +9,8 @@ import {
     MarkConversationAsReadData,
     MessageReceivedData,
     PresenceUpdateData, GroupInfoUpdatedData, GroupMessageReceivedData, SystemMessageReceivedData
-} from './ChatHub.Types';
-import {ChatHubUtils} from './ChatHub.Utils';
+} from './ChatHub.Types.js';
+import {ChatHubUtils} from './ChatHub.Utils.js';
 
 export class ChatHub {
     connection?: HubConnection;
